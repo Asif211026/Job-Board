@@ -1,11 +1,11 @@
 {
   "name": "job-board-server",
   "version": "1.0.0",
-  "description": "Backend server for Job Board application",
-  "main": "src/index.js",
+  "description": "Backend API for Job Board application",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "test": "jest"
   },
   "keywords": [],

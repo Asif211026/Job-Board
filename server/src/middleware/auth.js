@@ -1,26 +1,26 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+/**
+ * Authentication middleware
+ * Verifies the JWT token in the request header and sets req.user if valid
+ */
+module.exports = function(req, res, next) {
+    // Get token from header
+    const token = req.header('x-auth-token');
+
+    // Check if no token
+    if (!token) {
+        return res.status(401).json({ msg: 'No token, authorization denied' });
+    }
+
+    // Verify token
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
-        
-        if (!token) {
-            throw new Error();
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findOne({ _id: decoded.userId });
-
-        if (!user) {
-            throw new Error();
-        }
-
-        req.user = user;
-        req.token = token;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jobboard123');
+        req.user = decoded.user;
         next();
-    } catch (error) {
-        res.status(401).json({ message: 'Please authenticate.' });
+    } catch (err) {
+        res.status(401).json({ msg: 'Token is not valid' });
     }
 };
 
@@ -36,6 +36,6 @@ const checkUserType = (allowedTypes) => {
 };
 
 module.exports = {
-    auth,
+    auth: module.exports,
     checkUserType
 }; 
