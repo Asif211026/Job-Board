@@ -69,7 +69,9 @@ npm run dev
 
 ## Screenshots
 
-(Screenshots will be added soon)
+![Screenshot 2025-03-20 221026](https://github.com/user-attachments/assets/b940592b-3daf-4acb-b761-8d9973066e5a)
+![Screenshot 2025-03-20 221048](https://github.com/user-attachments/assets/ec978975-da1a-46bc-afb8-e26fa628b33f)
+
 
 ## Contributing
 
