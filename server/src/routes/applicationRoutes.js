@@ -3,6 +3,9 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const auth = require('../middleware/auth');
 
+// Load Application model
+const Application = require('../models/Application');
+
 // @route   GET api/applications
 // @desc    Get all applications for current user
 // @access  Private
