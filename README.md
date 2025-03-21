@@ -2,6 +2,10 @@
 
 A modern job board platform with features for job seekers and employers.
 
+#Deployment
+-Frontend :- job-board-theta-liart.vercel.app
+-Backend :-  https://job-board-um9x.onrender.com
+
 ## Features
 
 ### For Job Seekers
