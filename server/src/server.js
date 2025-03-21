@@ -15,9 +15,20 @@ app.use(express.json({ extended: false }));
 app.use(cors());
 
 // Define API routes
-app.use('/api/jobs', require('./routes/jobRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/applications', require('./routes/applicationRoutes'));
+// Using dynamic imports to handle potential errors more gracefully
+try {
+  // Define available routes
+  app.use('/api/jobs', require('./routes/jobRoutes'));
+  app.use('/api/users', require('./routes/userRoutes'));
+  app.use('/api/applications', require('./routes/applicationRoutes'));
+} catch (err) {
+  console.error('Error loading routes:', err.message);
+}
+
+// Simple health check route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {

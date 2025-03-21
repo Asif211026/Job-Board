@@ -5,7 +5,7 @@ const User = require('../models/User');
  * Authentication middleware
  * Verifies the JWT token in the request header and sets req.user if valid
  */
-module.exports = function(req, res, next) {
+const auth = function(req, res, next) {
     // Get token from header
     const token = req.header('x-auth-token');
 
@@ -36,6 +36,6 @@ const checkUserType = (allowedTypes) => {
 };
 
 module.exports = {
-    auth: module.exports,
+    auth,
     checkUserType
 }; 

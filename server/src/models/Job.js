@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const jobSchema = new mongoose.Schema({
+const JobSchema = new Schema({
     title: {
         type: String,
         required: true,
@@ -16,87 +17,69 @@ const jobSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    type: {
+        type: String,
+        enum: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Remote'],
+        required: true
+    },
     description: {
         type: String,
         required: true
     },
-    requirements: {
+    responsibilities: [String],
+    requirements: [String],
+    benefits: [String],
+    experience: {
         type: String,
+        enum: ['entry', 'mid', 'senior', 'lead', 'executive'],
         required: true
     },
     salary: {
-        min: {
-            type: Number,
-            required: true
-        },
-        max: {
-            type: Number,
-            required: true
-        },
-        currency: {
-            type: String,
-            default: 'USD'
-        }
-    },
-    jobType: {
         type: String,
-        enum: ['full-time', 'part-time', 'contract', 'internship'],
         required: true
+    },
+    skills: [String],
+    employer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['active', 'expired', 'draft'],
+        default: 'active'
+    },
+    applicationDeadline: {
+        type: Date
     },
     category: {
         type: String,
         required: true,
         trim: true
     },
-    experience: {
-        type: String,
-        enum: ['entry', 'mid', 'senior', 'lead', 'executive'],
-        required: true
+    tags: [String],
+    applicationsCount: {
+        type: Number,
+        default: 0
     },
-    employer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    viewsCount: {
+        type: Number,
+        default: 0
     },
-    applications: [{
-        applicant: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        resume: String,
-        coverLetter: String,
-        appliedAt: {
-            type: Date,
-            default: Date.now
-        },
-        status: {
-            type: String,
-            enum: ['pending', 'reviewed', 'shortlisted', 'rejected'],
-            default: 'pending'
-        }
-    }],
-    status: {
-        type: String,
-        enum: ['active', 'closed', 'draft'],
-        default: 'active'
-    },
-    createdAt: {
+    postedDate: {
         type: Date,
         default: Date.now
-    },
-    deadline: {
-        type: Date
     }
 });
 
-// Index for search functionality
-jobSchema.index({
+// Create a text index for searching
+JobSchema.index({
     title: 'text',
+    company: 'text',
     description: 'text',
-    requirements: 'text',
-    category: 'text'
+    skills: 'text'
 });
 
-const Job = mongoose.model('Job', jobSchema);
+const Job = mongoose.model('Job', JobSchema);
 
 module.exports = Job; 

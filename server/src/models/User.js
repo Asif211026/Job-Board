@@ -1,13 +1,18 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     email: {
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     password: {
         type: String,
@@ -17,52 +22,85 @@ const userSchema = new mongoose.Schema({
     userType: {
         type: String,
         enum: ['jobseeker', 'employer', 'admin'],
-        required: true
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true
+        default: 'jobseeker'
     },
     company: {
         type: String,
-        trim: true,
         required: function() {
             return this.userType === 'employer';
         }
     },
-    phone: {
-        type: String,
-        trim: true
-    },
     location: {
-        type: String,
-        trim: true
+        type: String
     },
+    phone: {
+        type: String
+    },
+    bio: {
+        type: String
+    },
+    skills: [{
+        type: String
+    }],
+    experience: [{
+        title: String,
+        company: String,
+        location: String,
+        from: Date,
+        to: Date,
+        current: Boolean,
+        description: String
+    }],
+    education: [{
+        school: String,
+        degree: String,
+        fieldOfStudy: String,
+        from: Date,
+        to: Date,
+        current: Boolean,
+        description: String
+    }],
+    social: {
+        linkedin: String,
+        twitter: String,
+        website: String,
+        github: String
+    },
+    savedJobs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Job'
+    }],
     createdAt: {
         type: Date,
         default: Date.now
     }
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
-    
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
+// Generate auth token
+UserSchema.methods.generateAuthToken = function() {
+    const user = {
+        id: this._id,
+        name: this.name,
+        email: this.email,
+        userType: this.userType
+    };
 
-// Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
+    return jwt.sign({ user }, process.env.JWT_SECRET || 'jobboard123', { expiresIn: '24h' });
 };
 
-const User = mongoose.model('User', userSchema);
+// Match user entered password to hashed password in database
+UserSchema.methods.matchPassword = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
-module.exports = User; 
+// Hash password before saving
+UserSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) {
+        next();
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+});
+
+module.exports = mongoose.model('User', UserSchema); 
