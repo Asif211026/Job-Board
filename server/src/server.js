@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -58,12 +59,43 @@ app.get('/api/mock/jobs', (req, res) => {
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../../client/build')));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../../client/build', 'index.html'));
-  });
+  // Check if client/build directory exists before trying to serve static files
+  const clientBuildPath = path.join(__dirname, '../../client/build');
+  
+  try {
+    if (fs.existsSync(clientBuildPath)) {
+      // If the build folder exists, serve static files
+      app.use(express.static(clientBuildPath));
+      
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve(clientBuildPath, 'index.html'));
+      });
+    } else {
+      // If the build folder doesn't exist, handle with a custom message
+      app.get('*', (req, res) => {
+        if (req.path.startsWith('/api')) {
+          // If it's an API route, let it pass through
+          res.status(404).json({ message: 'API endpoint not found' });
+        } else {
+          // For frontend routes, explain that we're API-only on this server
+          res.send(`
+            <h1>Job Board API Server</h1>
+            <p>This is the API server for the Job Board application.</p>
+            <p>The frontend is deployed separately at: <a href="https://job-board-frontend-vercel.app">https://job-board-frontend-vercel.app</a></p>
+            <p>For API documentation, please refer to <a href="/api/health">/api/health</a> and other API endpoints.</p>
+          `);
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error serving static files:', err.message);
+    // Fallback route handler
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api')) {
+        res.send('API server running. Static files not available.');
+      }
+    });
+  }
 }
 
 // Database connection
